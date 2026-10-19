@@ -29,7 +29,7 @@ const GT = {
     apparelTxt: 'On clothing, place the logo on the chest or centered on the back. Check the contrast against the fabric color.',
     cardName: 'Alex Morgan', cardRole: 'Creative Director',
     thanks: 'Thank you', closeTxt: 'Questions about using the {brand} logo? Contact KPR Media before producing new materials.',
-    madeWith: 'Generated with Logokit'
+    madeWith: 'Made by KPR Media'
   },
   nl: {
     guidelines: 'Logorichtlijnen', version: 'Versie 1.0',
@@ -58,7 +58,7 @@ const GT = {
     apparelTxt: 'Plaats het logo op kleding op de borst of gecentreerd op de rug. Controleer het contrast met de stofkleur.',
     cardName: 'Sam de Vries', cardRole: 'Creatief directeur',
     thanks: 'Dank je wel', closeTxt: 'Vragen over het gebruik van het {brand}-logo? Neem contact op met KPR Media voordat je nieuwe materialen produceert.',
-    madeWith: 'Gemaakt met Logokit'
+    madeWith: 'Gemaakt door KPR Media'
   }
 };
 
