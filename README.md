@@ -20,8 +20,17 @@ cp "$K"/silka-regular-webfont.woff2 "$K"/silka-regular-webfont.woff "$K"/silka-r
 { printf "window.SILKA_TTF = '"; base64 -i "$K/silka-regular-webfont.ttf" | tr -d '\n'; echo "';"; } > logokit/fonts/silka-pdf.js
 ```
 
+## Fotorealistische mockups
+De merktoepassingen in de guide (pagina 11–15) gebruiken blanco productfoto's uit `mockups/` (AI-gegenereerd via Canva). Het logo wordt in de browser op de foto gezet, met perspectief, kromming en de licht/schaduw van de foto. De foto's staan als base64 in `logokit/mockups-data.js`, zodat het ook offline werkt. Na het vervangen van een foto opnieuw genereren:
+
+```bash
+python3 -c "import base64;m={'tote':'draagtassen','mug':'mok','cards':'visitekaartjes','folder':'map','shirt':'t-shirt'};open('logokit/mockups-data.js','w').write('window.MOCKUP_PHOTOS = {\n'+''.join(f\"  {k}: 'data:image/jpeg;base64,{base64.b64encode(open(f'mockups/{v}.jpg','rb').read()).decode()}',\n\" for k,v in m.items())+'};\n')"
+```
+Let op: de plaatsing van het logo is afgestemd op deze vijf foto's (`SCENES` in `logokit/mockup.js`).
+
 ## Bestanden
 - `engine.js` SVG-analyse en export (raster, EPS, PDF, ico)
 - `guide.js` PDF-logoguide
+- `mockup.js` logo op de mockupfoto's plaatsen
 - `app.js` interface en pakketplanning
 - `Logopack_Logo_Guidelines.pdf` voorbeeldguide van het origineel, ter referentie

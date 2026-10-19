@@ -114,8 +114,8 @@ window.buildGuide = async function buildGuide(ctx) {
     return { x: ox, y: oy, w: logo.w * sx, h: logo.h * sy };
   };
   // kies de beste logoversie voor een achtergrond
-  const logoOn = (bg, asset = ctx.primary) => {
-    const ok = cols => Math.min(...cols.map(c => LK.contrast(c, bg))) >= LK.MIN_CONTRAST;
+  const logoOn = (bg, asset = ctx.primary, min = LK.MIN_CONTRAST) => {
+    const ok = cols => Math.min(...cols.map(c => LK.contrast(c, bg))) >= min;
     if (ok(asset.logo.colors)) return { logo: asset.logo };
     if (asset === ctx.primary && ctx.dark && ok(ctx.dark.logo.colors)) return { logo: ctx.dark.logo };
     // voorkeur: een merkkleur met goed contrast, dan wit, dan zwart
@@ -324,15 +324,8 @@ window.buildGuide = async function buildGuide(ctx) {
   }
 
   if (ctx.apps) {
-    const mark = (ctx.assets.find(a => a.type === 'mark' || a.type === 'monogram') || ctx.primary).logo;
     const accTxt = LK.lum(accent) > 0.45 ? ink : '#FFFFFF';
     const logoOnFill = (bg) => logoOn(bg);
-    const appPage = (idx, txt, draw) => {
-      newPage(idx);
-      heading(pageTitles[idx - 1], txt, { w: 220 });
-      rect(300, 60, W - 300 - M, H - 120, soft, 8);
-      draw(300, 60, W - 300 - M, H - 120);
-    };
 
     /* 10 — Brand applications */
     newPage(10, { bg: accent, dark: accTxt === '#FFFFFF' });
@@ -340,71 +333,15 @@ window.buildGuide = async function buildGuide(ctx) {
     text(tr(L.appsIntro), M, 270, { size: 12, color: accTxt, maxW: 380, lh: 1.5 });
     { const ld = logoOnFill(accent); drawLogo(ld.logo, W - M - 280, 150, 260, 260, { fill: ld.fill || (LK.contrast(accent, '#FFFFFF') > 2.4 ? '#FFFFFF' : ink) }); }
 
-    /* 11 — Tote bags */
-    appPage(11, L.toteTxt, (x, y, w, h) => {
-      const bag = (bx, by, bw, bh, color) => {
-        doc.setDrawColor(color); doc.setLineWidth(9);
-        doc.path([{ op: 'm', c: [bx + bw * 0.28, by + 4] }, { op: 'c', c: [bx + bw * 0.28, by - bh * 0.42, bx + bw * 0.72, by - bh * 0.42, bx + bw * 0.72, by + 4] }]); doc.stroke();
-        doc.setFillColor(color);
-        doc.path([{ op: 'm', c: [bx, by] }, { op: 'l', c: [bx + bw, by] }, { op: 'l', c: [bx + bw * 1.03, by + bh] }, { op: 'l', c: [bx - bw * 0.03, by + bh] }, { op: 'h', c: [] }]); doc.fill();
-        const ld = logoOn(color); drawLogo(ld.logo, bx + bw * 0.18, by + bh * 0.3, bw * 0.64, bh * 0.4, { fill: ld.fill });
-      };
-      const bw = w * 0.3, bh = bw * 1.15;
-      bag(x + w * 0.12, y + h * 0.3, bw, bh, ctx.light);
-      bag(x + w * 0.56, y + h * 0.3, bw, bh, accent);
-    });
-
-    /* 12 — Drinkware */
-    appPage(12, L.drinkTxt, (x, y, w, h) => {
-      // mok
-      const mx = x + w * 0.1, my = y + h * 0.32, mw = w * 0.32, mh = mw * 1.05;
-      doc.setDrawColor(ctx.light === '#FFFFFF' ? '#E4E4E0' : ctx.light); doc.setLineWidth(14); doc.circle(mx + mw, my + mh * 0.48, mh * 0.22, 'S');
-      rect(mx, my, mw, mh, ctx.light === '#FFFFFF' ? '#FFFFFF' : ctx.light, 14);
-      { const ld = logoOn(ctx.light); drawLogo(ld.logo, mx + mw * 0.15, my + mh * 0.3, mw * 0.7, mh * 0.4, { fill: ld.fill }); }
-      // fles
-      const bx = x + w * 0.62, by = y + h * 0.14, bw = w * 0.2, bh = h * 0.74;
-      rect(bx + bw * 0.3, by, bw * 0.4, bh * 0.08, '#2B2B2B', 3);
-      rect(bx + bw * 0.2, by + bh * 0.07, bw * 0.6, bh * 0.07, ink, 4);
-      rect(bx, by + bh * 0.12, bw, bh * 0.88, accent, bw * 0.3);
-      { const ld = logoOn(accent, ctx.assets.find(a => a.logo === mark) || ctx.primary); drawLogo(ld.logo, bx + bw * 0.18, by + bh * 0.42, bw * 0.64, bh * 0.3, { fill: ld.fill }); }
-    });
-
-    /* 13 — Business cards */
-    appPage(13, L.cardTxt, (x, y, w, h) => {
-      const cw = w * 0.4, ch = cw * 0.6;
-      const c1x = x + w * 0.07, c1y = y + h * 0.18, c2x = x + w * 0.53, c2y = y + h * 0.46;
-      rect(c1x + 4, c1y + 6, cw, ch, '#D9D9D4', 4); rect(c1x, c1y, cw, ch, accent, 4);
-      { const ld = logoOn(accent, ctx.assets.find(a => a.logo === mark) || ctx.primary); drawLogo(ld.logo, c1x + cw * 0.3, c1y + ch * 0.25, cw * 0.4, ch * 0.5, { fill: ld.fill }); }
-      rect(c2x + 4, c2y + 6, cw, ch, '#D9D9D4', 4); rect(c2x, c2y, cw, ch, '#FFFFFF', 4);
-      drawLogo(primary, c2x + 16, c2y + 16, cw * 0.45, ch * 0.22);
-      text(L.cardName, c2x + 16, c2y + ch - 52, { size: 8.5, bold: true });
-      text(`${L.cardRole}\nhello@${LK.slug(ctx.brand) || 'brand'}.com`, c2x + 16, c2y + ch - 39, { size: 7, color: grey, lh: 1.45 });
-      rect(c2x + cw - 6, c2y, 6, ch, accent);
-    });
-
-    /* 14 — Presentation folders */
-    appPage(14, L.folderTxt, (x, y, w, h) => {
-      const fw = w * 0.36, fh = fw * 1.3;
-      const f1x = x + w * 0.1, f1y = y + (h - fh) / 2, f2x = x + w * 0.54, f2y = f1y + 18;
-      rect(f1x + 5, f1y + 7, fw, fh, '#D9D9D4', 3); rect(f1x, f1y, fw, fh, ink, 3);
-      { const ld = logoOn(ink); drawLogo(ld.logo, f1x + fw * 0.15, f1y + fh * 0.36, fw * 0.7, fh * 0.28, { fill: ld.fill }); }
-      rect(f2x + 5, f2y + 7, fw, fh, '#D9D9D4', 3); rect(f2x, f2y, fw, fh, '#FFFFFF', 3);
-      rect(f2x, f2y + fh * 0.72, fw, fh * 0.28, accent);
-      drawLogo(primary, f2x + 18, f2y + 20, fw * 0.42, fh * 0.1);
-    });
-
-    /* 15 — Apparel */
-    appPage(15, L.apparelTxt, (x, y, w, h) => {
-      const shirt = (sx, sy, s, color) => {
-        const P = [[0.32, 0], [0.42, 0.05], [0.58, 0.05], [0.68, 0], [1, 0.16], [0.9, 0.36], [0.78, 0.3], [0.78, 1], [0.22, 1], [0.22, 0.3], [0.1, 0.36], [0, 0.16]];
-        const ops = P.map((p, k) => ({ op: k ? 'l' : 'm', c: [sx + p[0] * s, sy + p[1] * s] })); ops.push({ op: 'h', c: [] });
-        doc.setFillColor(color); doc.path(ops); doc.fill();
-        if (LK.contrast(color, soft) < 1.2) { doc.setDrawColor('#CFCFCA'); doc.setLineWidth(0.8); doc.path(ops); doc.stroke(); }
-        const ld = logoOn(color); drawLogo(ld.logo, sx + s * 0.32, sy + s * 0.22, s * 0.36, s * 0.22, { fill: ld.fill });
-      };
-      const s = Math.min(w * 0.4, h * 0.75);
-      shirt(x + w * 0.06, y + (h - s) / 2, s, ink);
-      shirt(x + w * 0.52, y + (h - s) / 2, s, ctx.light === soft ? '#FFFFFF' : ctx.light);
+    /* 11–15 — fotorealistische mockups; zonder foto's terug naar een lege pagina met alleen tekst */
+    const markAsset = ctx.assets.find(a => a.type === 'mark' || a.type === 'monogram') || ctx.primary;
+    const PW = W - 290 - M, PH = 400, PX = 290, PY = (H - PH) / 2;
+    const photos = await LK.composeMockups({ pick: (bg, asset) => logoOn(bg, asset, 1.8), primary: ctx.primary, mark: markAsset, outW: Math.round(PW * 2), outH: Math.round(PH * 2) });
+    [[11, L.toteTxt, 'tote'], [12, L.drinkTxt, 'mug'], [13, L.cardTxt, 'cards'], [14, L.folderTxt, 'folder'], [15, L.apparelTxt, 'shirt']].forEach(([idx, txt, key]) => {
+      newPage(idx);
+      heading(pageTitles[idx - 1], txt, { w: 210 });
+      if (photos && photos[key]) doc.addImage(photos[key], 'JPEG', PX, PY, PW, PH, `mockup-${key}`, 'NONE');
+      else rect(PX, PY, PW, PH, soft, 8);
     });
   }
 
