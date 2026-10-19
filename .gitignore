@@ -1,0 +1,9 @@
+# Gelicentieerde fonts (Silka) — niet verspreiden; lokaal toevoegen in logokit/fonts/
+logokit/fonts/
+
+# Referentiemateriaal van derden
+Logopack_Logo_Guidelines.pdf
+
+# Lokale tooling en systeembestanden
+.claude/
+.DS_Store
